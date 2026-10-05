@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Sensibilidade Free Fire</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+        }
+        /* Custom scrollbar for dark minimalist theme */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555555;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-black text-white p-4 md:p-8 select-none">
+
+    <div class="max-w-3xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="text-center space-y-2 border-b border-white/20 pb-6">
+            <div class="flex justify-center items-center gap-3 text-white mb-2">
+                <i data-lucide="sparkles" class="w-6 h-6"></i>
+                <h1 class="text-xl md:text-2xl font-black tracking-wider uppercase">Gerenciador de Sensibilidade Free Fire</h1>
+            </div>
+            <p class="text-white/60 max-w-lg mx-auto text-xs md:text-sm">
+                Selecione seu aparelho entre todas as marcas globais, configure DPI e botão para gerar sua sensi ideal.
+            </p>
+        </header>
+
+        <!-- Device Selection & Global Search -->
+        <div class="bg-black border border-white/30 rounded-xl p-5 space-y-4 shadow-2xl relative">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-white">
+                    <i data-lucide="smartphone" class="w-5 h-5 text-white"></i>
+                    <h2 class="font-bold text-sm md:text-base uppercase tracking-wide">Modelo do Aparelho ou Emulador</h2>
+                </div>
+                <span id="selectedBrandBadge" class="text-[11px] bg-white text-black px-2.5 py-1 rounded font-extrabold uppercase tracking-widest">
+                    Samsung
+                </span>
+            </div>
+
+            <div class="relative">
+                <div 
+                    id="dropdownToggle"
+                    class="w-full bg-black border border-white/40 hover:border-white rounded-lg p-3.5 flex items-center justify-between cursor-pointer transition-all shadow-inner"
+                >
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <span id="selectedDeviceLabel" class="font-bold text-white text-sm md:text-base truncate">Samsung Galaxy A14 5G</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-white/70 shrink-0">
+                        <span id="defaultDpiDisplay" class="hidden sm:inline bg-white/10 px-2 py-0.5 rounded border border-white/20">DPI Padrão: 420</span>
+                        <i data-lucide="sliders" class="w-4 h-4 text-white"></i>
+                    </div>
+                </div>
+
+                <!-- Smart Search Dropdown -->
+                <div id="dropdownMenu" class="hidden absolute top-full left-0 right-0 mt-2 bg-black border border-white/50 rounded-xl shadow-2xl z-50 overflow-hidden">
+                    <div class="p-3 border-b border-white/20 relative flex items-center">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-6 text-white/50"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Buscar marca ou modelo (Samsung, Xiaomi, Motorola, Apple, Oppo, Vivo...)"
+                            class="w-full bg-black border border-white/30 rounded-lg pl-10 pr-4 py-2.5 text-white text-xs md:text-sm focus:outline-none focus:border-white"
+                        />
+                    </div>
+
+                    <div id="deviceListContainer" class="max-h-64 overflow-y-auto divide-y divide-white/10">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration & Parameters Grid -->
+        <div class="bg-black border border-white/30 rounded-xl p-5 space-y-5 shadow-2xl">
+            <div class="flex items-center gap-2 text-white">
+                <i data-lucide="sliders" class="w-5 h-5 text-white"></i>
+                <h2 class="font-bold text-sm md:text-base uppercase tracking-wide">Parâmetros de Ajuste</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <!-- Platform Selection -->
+                <div class="space-y-2">
+                    <label class="text-white/70 font-semibold text-xs uppercase tracking-wider">Plataforma</label>
+                    <div class="flex bg-black p-1 rounded-lg border border-white/30">
+                        <button
+                            id="btnMobile"
+                            type="button"
+                            class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs font-bold transition-all bg-white text-black shadow"
+                        >
+                            <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Mobile
+                        </button>
+                        <button
+                            id="btnPc"
+                            type="button"
+                            class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs font-bold transition-all text-white/70 hover:text-white"
+                        >
+                            <i data-lucide="monitor" class="w-3.5 h-3.5"></i> PC
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Editable DPI Input -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <label for="dpiInput" class="text-white/70 font-semibold uppercase tracking-wider">DPI do Aparelho</label>
+                        <span id="dpiDefaultLabel" class="text-[10px] text-white/50">Padrão: 420</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input
+                            type="number"
+                            id="dpiInput"
+                            min="100"
+                            max="2000"
+                            step="1"
+                            value="420"
+                            class="w-full bg-black border border-white/40 rounded-lg px-3 py-2 text-white font-bold text-sm focus:outline-none focus:border-white transition-colors shadow-inner"
+                        />
+                        <span class="absolute right-3 text-[10px] text-white/40 font-bold uppercase">DPI</span>
+                    </div>
+                </div>
+
+                <!-- Editable Button Size Input -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <label for="buttonSizeInput" class="text-white/70 font-semibold uppercase tracking-wider">Botão Atirar</label>
+                        <span class="text-[10px] text-white/50">Ideal: 45%-52%</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input
+                            type="number"
+                            id="buttonSizeInput"
+                            min="10"
+                            max="100"
+                            step="1"
+                            value="48"
+                            class="w-full bg-black border border-white/40 rounded-lg px-3 py-2 text-white font-bold text-sm focus:outline-none focus:border-white transition-colors shadow-inner"
+                        />
+                        <span class="absolute right-3 text-[10px] text-white/40 font-bold uppercase">%</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Generate Button -->
+            <div class="pt-2">
+                <button
+                    id="generateBtn"
+                    class="w-full bg-white hover:bg-white/90 text-black font-black py-3.5 px-6 rounded-lg uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2 shadow-2xl transition-transform active:scale-[0.99] cursor-pointer"
+                >
+                    <i data-lucide="zap" class="w-4 h-4 fill-current"></i> Gerar Sensibilidade Ideal
+                </button>
+            </div>
+        </div>
+
+        <!-- Generated Sensitivity Results Panel -->
+        <div class="bg-black border border-white/40 rounded-xl p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between text-white border-b border-white/20 pb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-white"></i>
+                    <h2 class="font-bold text-sm md:text-base uppercase tracking-wider">Sensibilidade Gerada</h2>
+                </div>
+                <button
+                    id="copySensiBtn"
+                    class="hidden bg-white text-black hover:bg-white/90 text-[11px] px-3 py-1.5 rounded font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow cursor-pointer"
+                >
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span id="copyBtnText">Copiar Sensi</span>
+                </button>
+            </div>
+
+            <div id="resultsContent">
+                <div class="py-8 text-center text-white/40 text-xs md:text-sm uppercase tracking-wider">
+                    Clique em <strong class="text-white">"Gerar Sensibilidade Ideal"</strong> para calcular sua sensi personalizada.
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-Time Comments & WhatsApp Feedback -->
+        <div class="bg-black border border-white/30 rounded-xl p-5 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-white/20 pb-3">
+                <div class="flex items-center gap-2 text-white">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                    <h2 class="font-bold text-sm md:text-base uppercase tracking-wider">Mural de Comentários & WhatsApp</h2>
+                </div>
+                <span class="text-[10px] bg-white/10 text-white/80 px-2 py-1 rounded border border-white/20 flex items-center gap-1">
+                    <i data-lucide="phone-call" class="w-3 h-3"></i> WhatsApp: 92 98602-9424
+                </span>
+            </div>
+
+            <form id="commentForm" class="space-y-3">
+                <div>
+                    <input
+                        type="text"
+                        id="commentNameInput"
+                        placeholder="Seu nome ou Nick no FF"
+                        required
+                        class="w-full bg-black border border-white/30 rounded-lg px-3.5 py-2.5 text-white text-xs md:text-sm focus:outline-none focus:border-white shadow-inner"
+                    />
+                </div>
+                <div>
+                    <textarea
+                        id="commentTextInput"
+                        placeholder="Deixe seu comentário, feedback ou dica de sensi..."
+                        rows="2"
+                        required
+                        class="w-full bg-black border border-white/30 rounded-lg px-3.5 py-2.5 text-white text-xs md:text-sm focus:outline-none focus:border-white shadow-inner resize-none"
+                    ></textarea>
+                </div>
+                <button
+                    type="submit"
+                    class="w-full bg-white hover:bg-white/90 text-black font-black py-3 px-4 rounded-lg uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-[0.99] cursor-pointer"
+                >
+                    <i data-lucide="send" class="w-4 h-4"></i> Enviar Comentário no Mural & WhatsApp (92 98602-9424)
+                </button>
+            </form>
+
+            <!-- Comments List -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-xs font-bold text-white/70 uppercase tracking-wider">Comentários Recentes da Comunidade</h3>
+                <div id="commentsList" class="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Comprehensive Global Device Database (Samsung, Xiaomi, Motorola, Apple, Oppo, Vivo, Realme, Infinix, Tecno, Huawei, Honor, OnePlus, Asus, Google, Sony, LG, Nokia, Nubia, PCs)
+        const DEVICE_DATABASE = [
+            // Samsung Galaxy Series
+            { brand: 'Samsung', model: 'Galaxy J2 / J5 / J7 (Classic)', ram: '1.5GB/2GB', defaultDpi: 320, screen: '5.0"' },
+            { brand: 'Samsung', model: 'Galaxy A10 / A20 / A30', ram: '2GB/3GB', defaultDpi: 380, screen: '6.4"' },
+            { brand: 'Samsung', model: 'Galaxy A04 / A04s', ram: '4GB', defaultDpi: 411, screen: '6.5"' },
+            { brand: 'Samsung', model: 'Galaxy A05 / A05s', ram: '4GB/6GB', defaultDpi: 411, screen: '6.7"' },
+            { brand: 'Samsung', model: 'Galaxy A13 / A14 / A16 5G', ram: '4GB/6GB', defaultDpi: 420, screen: '6.6"' },
+            { brand: 'Samsung', model: 'Galaxy A15 5G', ram: '4GB/8GB', defaultDpi: 430, screen: '6.5"' },
+            { brand: 'Samsung', model: 'Galaxy A24 / A25 5G', ram: '6GB/8GB', defaultDpi: 440, screen: '6.5"' },
+            { brand: 'Samsung', model: 'Galaxy A32 / A33 / A35 5G', ram: '6GB/8GB', defaultDpi: 411, screen: '6.4"' },
+            { brand: 'Samsung', model: 'Galaxy A52 / A53 / A54 5G', ram: '6GB/8GB', defaultDpi: 411, screen: '6.5"' },
+            { brand: 'Samsung', model: 'Galaxy A55 5G / A56', ram: '8GB/12GB', defaultDpi: 450, screen: '6.6"' },
+            { brand: 'Samsung', model: 'Galaxy S20 / S20 FE / S20 Ultra', ram: '6GB/8GB', defaultDpi: 411, screen: '6.5"' },
+            { brand: 'Samsung', model: 'Galaxy S21 / S21+ / S21 Ultra', ram: '8GB/12GB', defaultDpi: 411, screen: '6.2"' },
+            { brand: 'Samsung', model: 'Galaxy S22 / S22+ / S22 Ultra', ram: '8GB/12GB', defaultDpi: 411, screen: '6.1"' },
+            { brand: 'Samsung', model: 'Galaxy S23 / S23+ / S23 Ultra', ram: '8GB/12GB', defaultDpi: 411, screen: '6.1"' },
+            { brand: 'Samsung', model: 'Galaxy S24 / S24+ / S24 Ultra', ram: '8GB/12GB', defaultDpi: 412, screen: '6.2"' },
+            { brand: 'Samsung', model: 'Galaxy S25 / S25+ / S25 Ultra', ram: '12GB/16GB', defaultDpi: 412, screen: '6.2"' },
+            { brand: 'Samsung', model: 'Galaxy Z Flip / Fold 4 / 5 / 6', ram: '8GB/12GB', defaultDpi: 420, screen: '7.6"' },
+
+            // Xiaomi / Redmi / Poco
+            { brand: 'Xiaomi', model: 'Redmi 4X / Note 4 / Note 5', ram: '3GB/4GB', defaultDpi: 380, screen: '5.99"' },
+            { brand: 'Xiaomi', model: 'Redmi 7 / 8 / 9 / 9C / 9A', ram: '3GB/4GB', defaultDpi: 393, screen: '6.53"' },
+            { brand: 'Xiaomi', model: 'Redmi 10 / 10C / 12 / 13 / 14 / 15', ram: '4GB/8GB', defaultDpi: 440, screen: '6.79"' },
+            { brand: 'Xiaomi', model: 'Redmi Note 8 / Note 9 Pro', ram: '4GB/6GB', defaultDpi: 395, screen: '6.3"' },
+            { brand: 'Xiaomi', model: 'Redmi Note 10 / Note 10 Pro', ram: '6GB/8GB', defaultDpi: 411, screen: '6.67"' },
+            { brand: 'Xiaomi', model: 'Redmi Note 11 / 11s / 12 / 12 Pro', ram: '6GB/8GB', defaultDpi: 411, screen: '6.67"' },
+            { brand: 'Xiaomi', model: 'Redmi Note 13 / 13 Pro+ 5G / 14 Pro', ram: '8GB/12GB', defaultDpi: 430, screen: '6.67"' },
+            { brand: 'Poco', model: 'Poco X3 / X3 Pro / X4 Pro / X5 / X6 / X7 Pro', ram: '6GB/12GB', defaultDpi: 440, screen: '6.67"' },
+            { brand: 'Poco', model: 'Poco F3 / F4 / F5 / F6 / F6 Pro / F7', ram: '8GB/12GB', defaultDpi: 411, screen: '6.67"' },
+            { brand: 'Xiaomi', model: 'Xiaomi 12 / 13 / 14 / 15 Ultra', ram: '8GB/16GB', defaultDpi: 420, screen: '6.36"' },
+
+            // Motorola
+            { brand: 'Motorola', model: 'Moto G5 / G6 / G7 / G8 Power', ram: '3GB/4GB', defaultDpi: 360, screen: '6.2"' },
+            { brand: 'Motorola', model: 'Moto E13 / E20 / E22 / E32', ram: '2GB/4GB', defaultDpi: 320, screen: '6.5"' },
+            { brand: 'Motorola', model: 'Moto G13 / G14 / G23 / G24', ram: '4GB', defaultDpi: 395, screen: '6.5"' },
+            { brand: 'Motorola', model: 'Moto G34 5G', ram: '4GB/8GB', defaultDpi: 395, screen: '6.5"' },
+            { brand: 'Motorola', model: 'Moto G52 / G53 / G54 / G55 5G', ram: '4GB/8GB', defaultDpi: 395, screen: '6.5"' },
+            { brand: 'Motorola', model: 'Moto G84 5G / G85', ram: '8GB/12GB', defaultDpi: 400, screen: '6.55"' },
+            { brand: 'Motorola', model: 'Moto Edge 30 / 40 / 50 Pro / Ultra / 60', ram: '8GB/12GB', defaultDpi: 420, screen: '6.55"' },
+
+            // Apple iPhone
+            { brand: 'Apple', model: 'iPhone 7 / 8 / SE (2020/2022/2025)', ram: '2GB/4GB', defaultDpi: 375, screen: '4.7"' },
+            { brand: 'Apple', model: 'iPhone X / XR / XS / XS Max', ram: '3GB/4GB', defaultDpi: 414, screen: '6.1"' },
+            { brand: 'Apple', model: 'iPhone 11 / 11 Pro / 11 Pro Max', ram: '4GB', defaultDpi: 460, screen: '6.1"' },
+            { brand: 'Apple', model: 'iPhone 12 / 12 mini / 12 Pro / 12 Pro Max', ram: '4GB/6GB', defaultDpi: 460, screen: '6.1"' },
+            { brand: 'Apple', model: 'iPhone 13 / 13 mini / 13 Pro / 13 Pro Max', ram: '4GB/6GB', defaultDpi: 460, screen: '6.1"' },
+            { brand: 'Apple', model: 'iPhone 14 / 14 Plus / 14 Pro / 14 Pro Max', ram: '6GB', defaultDpi: 460, screen: '6.1"' },
+            { brand: 'Apple', model: 'iPhone 15 / 15 Plus / 15 Pro / 15 Pro Max', ram: '6GB/8GB', defaultDpi: 460, screen: '6.1"' },
+            { brand: 'Apple', model: 'iPhone 16 / 16 Plus / 16 Pro / 16 Pro Max / 17', ram: '8GB/12GB', defaultDpi: 460, screen: '6.3"' },
+
+            // Oppo
+            { brand: 'Oppo', model: 'Oppo A12 / A15 / A16 / A18 / A38 / A40', ram: '3GB/6GB', defaultDpi: 400, screen: '6.56"' },
+            { brand: 'Oppo', model: 'Oppo A58 / A78 / A79 5G / A80', ram: '6GB/8GB', defaultDpi: 400, screen: '6.56"' },
+            { brand: 'Oppo', model: 'Oppo Reno 5 / Reno 6 / Reno 7', ram: '8GB', defaultDpi: 411, screen: '6.43"' },
+            { brand: 'Oppo', model: 'Oppo Reno 8 / Reno 9 / Reno 10 / Reno 11 / Reno 12 / Reno 13', ram: '8GB/12GB', defaultDpi: 415, screen: '6.7"' },
+            { brand: 'Oppo', model: 'Oppo Find X5 / Find X6 / Find X7 / Find X8 Ultra', ram: '12GB/16GB', defaultDpi: 430, screen: '6.82"' },
+
+            // Vivo
+            { brand: 'Vivo', model: 'Vivo Y11 / Y12 / Y15 / Y20 / Y21 / Y22', ram: '3GB/4GB', defaultDpi: 390, screen: '6.51"' },
+            { brand: 'Vivo', model: 'Vivo Y17s / Y27 / Y36 / Y100 / Y200 / Y300', ram: '4GB/8GB', defaultDpi: 400, screen: '6.64"' },
+            { brand: 'Vivo', model: 'Vivo V21 / V23 / V25 / V27 / V29 / V30 / V40 / V50', ram: '8GB/12GB', defaultDpi: 420, screen: '6.78"' },
+            { brand: 'Vivo', model: 'Vivo X80 / X90 / X100 / X200 / X200 Pro', ram: '12GB/16GB', defaultDpi: 440, screen: '6.78"' },
+
+            // Realme
+            { brand: 'Realme', model: 'Realme C2 / C3 / C11 / C21 / C30 / C33 / C35', ram: '2GB/4GB', defaultDpi: 400, screen: '6.5"' },
+            { brand: 'Realme', model: 'Realme C53 / C65 / C67 / C75', ram: '6GB/8GB', defaultDpi: 400, screen: '6.74"' },
+            { brand: 'Realme', model: 'Realme 7 / 8 / 9 / 10 / 11 / 12 / 13 Pro+', ram: '8GB/12GB', defaultDpi: 411, screen: '6.7"' },
+            { brand: 'Realme', model: 'Realme GT Neo 2 / 3 / GT 5 / GT 6 / GT 7 Pro', ram: '8GB/16GB', defaultDpi: 420, screen: '6.78"' },
+
+            // Infinix & Tecno
+            { brand: 'Infinix', model: 'Infinix Hot 10 / Hot 11 / Hot 12 / Hot 30 / Hot 40 / Hot 50', ram: '4GB/8GB', defaultDpi: 396, screen: '6.78"' },
+            { brand: 'Infinix', model: 'Infinix Note 10 / 11 / 12 / 30 / 40 / 50 Pro', ram: '8GB', defaultDpi: 400, screen: '6.78"' },
+            { brand: 'Infinix', model: 'Infinix GT 10 Pro / GT 20 Pro / GT 30', ram: '8GB/12GB', defaultDpi: 420, screen: '6.78"' },
+            { brand: 'Tecno', model: 'Tecno Spark 8 / 9 / 10 / 20 / 30 Pro', ram: '4GB/8GB', defaultDpi: 390, screen: '6.8"' },
+            { brand: 'Tecno', model: 'Tecno Pova 4 / Pova 5 / Pova 6 / Pova 7 Pro', ram: '8GB', defaultDpi: 400, screen: '6.8"' },
+
+            // Huawei & Honor
+            { brand: 'Huawei', model: 'Huawei Y6 / Y7 / Y9 / P30 Lite / P40 Lite', ram: '4GB/6GB', defaultDpi: 380, screen: '6.15"' },
+            { brand: 'Huawei', model: 'Huawei Nova 8 / 9 / 10 / 11 / 12 / 13', ram: '8GB', defaultDpi: 411, screen: '6.7"' },
+            { brand: 'Huawei', model: 'Huawei Pura 70 / Mate 60 / Mate 70 / Mate 80 Pro', ram: '12GB', defaultDpi: 430, screen: '6.8"' },
+            { brand: 'Honor', model: 'Honor X7 / X8 / X9 / X7b / X8b / X9b / X10', ram: '6GB/8GB', defaultDpi: 400, screen: '6.77"' },
+            { brand: 'Honor', model: 'Honor 50 / 70 / 90 / 100 / 200 / 300 Pro', ram: '8GB/16GB', defaultDpi: 420, screen: '6.78"' },
+
+            // OnePlus, Asus, Google, Sony, LG, Nokia & Others
+            { brand: 'OnePlus', model: 'OnePlus 6T / 7 / 7T / 8 / 9 / 10 / 11 / 12 / 13', ram: '8GB/16GB', defaultDpi: 420, screen: '6.7"' },
+            { brand: 'OnePlus', model: 'OnePlus Nord / Nord N30 / CE 3 / CE 4 / CE 5', ram: '8GB', defaultDpi: 411, screen: '6.72"' },
+            { brand: 'Asus', model: 'Asus Zenfone 7 / 8 / 9 / 10 / 11 Ultra', ram: '8GB/16GB', defaultDpi: 420, screen: '6.78"' },
+            { brand: 'Asus', model: 'ROG Phone 3 / 5 / 6 / 7 / 8 Pro / 9', ram: '16GB/24GB', defaultDpi: 440, screen: '6.78"' },
+            { brand: 'Google', model: 'Pixel 4a / 5 / 6 / 6a / 7 / 7a / 8 / 8a / 9 / 9 Pro', ram: '6GB/12GB', defaultDpi: 411, screen: '6.2"' },
+            { brand: 'Sony', model: 'Xperia 1 / 5 / 10 (II, III, IV, V, VI)', ram: '8GB/12GB', defaultDpi: 420, screen: '6.5"' },
+            { brand: 'LG', model: 'LG K40 / K50 / G7 ThinQ / V50 / V60 ThinQ', ram: '4GB/8GB', defaultDpi: 400, screen: '6.4"' },
+            { brand: 'Nokia', model: 'Nokia 5.4 / G20 / G50 / X30 / XR21', ram: '4GB/6GB', defaultDpi: 390, screen: '6.43"' },
+            { brand: 'Nubia', model: 'RedMagic 6 / 7 / 8 / 9 Pro / 10 Pro / 10S', ram: '12GB/24GB', defaultDpi: 440, screen: '6.8"' },
+
+            // PC Emulators
+            { brand: 'PC (Emulador)', model: 'BlueStacks 5 (HiperCore Engine)', ram: '16GB+', defaultDpi: 900, screen: 'Monitor 1080p' },
+            { brand: 'PC (Emulador)', model: 'MSI App Player / LDPlayer 9', ram: '16GB+', defaultDpi: 800, screen: 'Monitor 1080p' },
+            { brand: 'PC (Emulador)', model: 'GameLoop (Tencent Official Engine)', ram: '16GB+', defaultDpi: 850, screen: 'Monitor 1080p' }
+        ];
+
+        // State variables
+        let selectedDevice = DEVICE_DATABASE.find(d => d.model.includes('A14 5G')) || DEVICE_DATABASE[4];
+        let currentPlatform = 'mobile';
+        let currentSensitivityResult = null;
+        let comments = [
+            { id: 1, name: 'Carlos FF', text: 'Essa sensi no Moto G34 / Galaxy A14 tá subindo muito capa!', time: 'Agora mesmo' },
+            { id: 2, name: 'Joga10', text: 'Muito boa a calculadora! Funcionou perfeitamente.', time: 'Há 5 min' }
+        ];
+
+        // DOM Elements
+        const dropdownToggle = document.getElementById('dropdownToggle');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const searchInput = document.getElementById('searchInput');
+        const deviceListContainer = document.getElementById('deviceListContainer');
+        const selectedDeviceLabel = document.getElementById('selectedDeviceLabel');
+        const selectedBrandBadge = document.getElementById('selectedBrandBadge');
+        const defaultDpiDisplay = document.getElementById('defaultDpiDisplay');
+        const dpiInput = document.getElementById('dpiInput');
+        const dpiDefaultLabel = document.getElementById('dpiDefaultLabel');
+        const buttonSizeInput = document.getElementById('buttonSizeInput');
+        const btnMobile = document.getElementById('btnMobile');
+        const btnPc = document.getElementById('btnPc');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultsContent = document.getElementById('resultsContent');
+        const copySensiBtn = document.getElementById('copySensiBtn');
+        const copyBtnText = document.getElementById('copyBtnText');
+        const commentForm = document.getElementById('commentForm');
+        const commentNameInput = document.getElementById('commentNameInput');
+        const commentTextInput = document.getElementById('commentTextInput');
+        const commentsList = document.getElementById('commentsList');
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Render Device List
+        function renderDeviceList(filter = '') {
+            const query = filter.toLowerCase().trim();
+            const filtered = query ? DEVICE_DATABASE.filter(d => 
+                d.brand.toLowerCase().includes(query) || 
+                d.model.toLowerCase().includes(query)
+            ) : DEVICE_DATABASE;
+
+            if (filtered.length === 0) {
+                deviceListContainer.innerHTML = '<div class="p-6 text-center text-white/50 text-xs">Nenhum modelo encontrado. Tente buscar por Samsung, Xiaomi, Motorola, Apple, Oppo, etc.</div>';
+                return;
+            }
+
+            deviceListContainer.innerHTML = filtered.map(d => `
+                <div class="px-4 py-3 hover:bg-white/10 flex items-center justify-between cursor-pointer transition-colors device-item" data-model="${d.model}" data-brand="${d.brand}">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-white text-xs md:text-sm">${d.brand}</span>
+                        <span class="text-white/70 text-xs md:text-sm">${d.model}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[11px] text-white/50">
+                        <span>RAM: ${d.ram}</span>
+                        <span class="bg-white/10 px-2 py-0.5 rounded border border-white/25">DPI: ${d.defaultDpi}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Attach click listeners
+            document.querySelectorAll('.device-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const brand = item.getAttribute('data-brand');
+                    const model = item.getAttribute('data-model');
+                    const dev = DEVICE_DATABASE.find(d => d.brand === brand && d.model === model);
+                    if (dev) {
+                        selectDevice(dev);
+                    }
+                });
+            });
+        }
+
+        function selectDevice(dev) {
+            selectedDevice = dev;
+            selectedDeviceLabel.textContent = `${dev.brand} ${dev.model}`;
+            selectedBrandBadge.textContent = dev.brand;
+            defaultDpiDisplay.textContent = `DPI Padrão: ${dev.defaultDpi}`;
+            dpiDefaultLabel.textContent = `Padrão: ${dev.defaultDpi}`;
+            dpiInput.value = dev.defaultDpi;
+
+            const isEm = dev.brand.includes('PC');
+            if (isEm) {
+                setPlatform('pc');
+            } else {
+                setPlatform('mobile');
+            }
+
+            dropdownMenu.classList.add('hidden');
+        }
+
+        function setPlatform(platform) {
+            currentPlatform = platform;
+            if (platform === 'mobile') {
+                btnMobile.className = "flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs font-bold transition-all bg-white text-black shadow";
+                btnPc.className = "flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs font-bold transition-all text-white/70 hover:text-white";
+                dpiInput.value = selectedDevice.defaultDpi;
+            } else {
+                btnPc.className = "flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs font-bold transition-all bg-white text-black shadow";
+                btnMobile.className = "flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs font-bold transition-all text-white/70 hover:text-white";
+                dpiInput.value = 800;
+            }
+        }
+
+        // Toggle Dropdown
+        dropdownToggle.addEventListener('click', () => {
+            dropdownMenu.classList.toggle('hidden');
+            if (!dropdownMenu.classList.contains('hidden')) {
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            renderDeviceList(e.target.value);
+        });
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+
+        // Platform buttons
+        btnMobile.addEventListener('click', () => setPlatform('mobile'));
+        btnPc.addEventListener('click', () => setPlatform('pc'));
+
+        // Generate Sensitivity Logic
+        generateBtn.addEventListener('click', () => {
+            const dpi = Number(dpiInput.value) || selectedDevice.defaultDpi;
+            const btnSize = Number(buttonSizeInput.value) || 48;
+            const isMotoG34 = selectedDevice.model.includes('G34');
+            const isApple = selectedDevice.brand === 'Apple';
+            const isPC = currentPlatform === 'pc';
+
+            let baseGeral = 180;
+            if (isMotoG34) {
+                baseGeral = 188;
+            } else if (isApple) {
+                baseGeral = 185;
+            } else if (isPC) {
+                baseGeral = 105;
+            } else {
+                const dpiFactor = 400 / Math.max(200, dpi);
+                const btnFactor = 48 / Math.max(20, btnSize);
+                baseGeral = 182 * Math.sqrt(dpiFactor) * Math.min(1.15, Math.max(0.85, btnFactor));
+            }
+
+            const geral = Math.max(145, Math.min(200, Math.round(baseGeral)));
+            const redDot = Math.max(135, Math.min(200, Math.round(geral * 0.95)));
+            const scope2x = Math.max(125, Math.min(200, Math.round(geral * 0.91)));
+            const scope4x = Math.max(115, Math.min(200, Math.round(geral * 0.86)));
+
+            currentSensitivityResult = {
+                geral,
+                redDot,
+                scope2x,
+                scope4x,
+                buttonSize: btnSize,
+                dpiUsed: dpi,
+                deviceName: `${selectedDevice.brand} ${selectedDevice.model}`
+            };
+
+            // Render Results
+            resultsContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-black border border-white/30 p-4 rounded-lg flex justify-between items-center shadow-inner">
+                        <div>
+                            <p class="text-[11px] text-white/60 mb-0.5 uppercase font-bold tracking-wider">Geral (Movimentação e Capa)</p>
+                            <p class="text-3xl md:text-4xl font-black text-white">${geral}</p>
+                        </div>
+                        <span class="text-xs font-bold text-white/80 bg-white/10 px-3 py-1.5 rounded border border-white/20">Principal</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-black border border-white/30 p-3 rounded-lg text-center">
+                            <p class="text-[10px] text-white/60 uppercase font-bold mb-1">Red Dot</p>
+                            <p class="text-xl md:text-2xl font-black text-white">${redDot}</p>
+                        </div>
+                        <div class="bg-black border border-white/30 p-3 rounded-lg text-center">
+                            <p class="text-[10px] text-white/60 uppercase font-bold mb-1">Mira 2x</p>
+                            <p class="text-xl md:text-2xl font-black text-white">${scope2x}</p>
+                        </div>
+                        <div class="bg-black border border-white/30 p-3 rounded-lg text-center">
+                            <p class="text-[10px] text-white/60 uppercase font-bold mb-1">Mira 4x</p>
+                            <p class="text-xl md:text-2xl font-black text-white">${scope4x}</p>
+                        </div>
+                        <div class="bg-black border border-white/30 p-3 rounded-lg text-center">
+                            <p class="text-[10px] text-white/60 uppercase font-bold mb-1">Botão de Atirar</p>
+                            <p class="text-xl md:text-2xl font-black text-white">${btnSize}%</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row justify-between items-center text-[11px] text-white/60 gap-1 border-t border-white/10">
+                        <span>Aparelho: <strong class="text-white">${selectedDevice.brand} ${selectedDevice.model}</strong></span>
+                        <span>DPI Aplicada: <strong class="text-white">${dpi}</strong></span>
+                    </div>
+                </div>
+            `;
+
+            copySensiBtn.classList.remove('hidden');
+        });
+
+        // Compact Clipboard Copy
+        copySensiBtn.addEventListener('click', () => {
+            if (!currentSensitivityResult) return;
+            const text = `G: ${currentSensitivityResult.geral} | Red: ${currentSensitivityResult.redDot} | 2x: ${currentSensitivityResult.scope2x} | 4x: ${currentSensitivityResult.scope4x} | Botão: ${currentSensitivityResult.buttonSize}%`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopiedFeedback();
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        });
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopiedFeedback();
+                }
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showCopiedFeedback() {
+            copyBtnText.textContent = 'Copiado!';
+            setTimeout(() => {
+                copyBtnText.textContent = 'Copiar Sensi';
+            }, 2500);
+        }
+
+        // Render Comments
+        function renderComments() {
+            commentsList.innerHTML = comments.map(c => `
+                <div class="bg-black border border-white/20 rounded-lg p-3 space-y-1 shadow-inner">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-xs text-white uppercase">${c.name}</span>
+                        <span class="text-[10px] text-white/40">${c.time}</span>
+                    </div>
+                    <p class="text-xs text-white/80 leading-relaxed">${c.text}</p>
+                </div>
+            `).join('');
+        }
+
+        // Comment Submission & WhatsApp Redirection (5592986029424)
+        commentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = commentNameInput.value.trim();
+            const text = commentTextInput.value.trim();
+            if (!name || !text) return;
+
+            const newComment = {
+                id: Date.now(),
+                name,
+                text,
+                time: 'Agora mesmo'
+            };
+
+            comments.unshift(newComment);
+            renderComments();
+
+            // WhatsApp formatting to 5592986029424
+            const waNumber = '5592986029424';
+            const message = `*Novo Comentário / Feedback - Sensi FF*\n\n*Nome:* ${name}\n*Comentário:* ${text}`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${waNumber}?text=${encodedMessage}`;
+
+            commentNameInput.value = '';
+            commentTextInput.value = '';
+
+            window.open(whatsappUrl, '_blank');
+        });
+
+        // Initial setup
+        renderDeviceList();
+        renderComments();
+    </script>
+</body>
+</html>
